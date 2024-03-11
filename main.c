@@ -11,6 +11,13 @@ typedef struct person {
     struct person *right;
 } NODE;
 
+int height(NODE *node) {            //this function is mostly due to checking if the pointer is not NULL
+    if (node == NULL) {
+        return 0;
+    }
+    return (node->height);
+}
+
 int max(int num1, int num2) {
     if (num1 > num2) {
         return num1;
@@ -41,8 +48,8 @@ NODE *leftrotation(NODE *A) {
     NODE *temp = B->left;
     B->left = A;
     A->right = temp;
-    A->height = max(A->left->height, A->right->height) + 1;
-    B->height = max(B->left->height, B->right->height) + 1;
+    A->height = max(height(A->left), height(A->right)) + 1;
+    B->height = max(height(B->left), height(B->right)) + 1;
     return B;
 }
 
@@ -51,8 +58,8 @@ NODE *rightrotation(NODE *A) {
     NODE *temp = B->right;
     B->right = A;
     A->left = temp;
-    A->height = max(A->left->height, A->right->height) + 1;
-    B->height = max(B->left->height, B->right->height) + 1;
+    A->height = max(height(A->left), height(A->right)) + 1;
+    B->height = max(height(B->left), height(B->right)) + 1;
     return B;
 }
 
@@ -83,20 +90,20 @@ NODE *insert(NODE *root, NODE *new_node) {
 
     root->height = max(leftH, rightH) + 1;          //assigning height to parent
 
-    int balance = leftH - rightH;
+    int balance = height(root->left) - height(root->right);
     if (balance > 1) {
-        if (new_node->ID < root->left->ID) {  //
+        if (new_node->ID < root->left->ID) {  //the child is on the left ready to perform
             return rightrotation(root);
-        } else {
+        } else {                                        //it means that the child is on the right
             root->left = leftrotation(root->left);
-            return rightrotation(root);
+            return rightrotation(root);             //now it is in the right place to perform RR
         }
     } else if (balance < -1) {
-        if (new_node->ID > root->right->ID) {
+        if (new_node->ID > root->right->ID) { //the child is on the right ready to perform
             return leftrotation(root);
-        } else {
+        } else {                        //it means the child is on the left
             root->right = rightrotation(root->right);
-            return leftrotation(root);
+            return leftrotation(root);     //now it is in the right place to perform LR
         }
     }
     return root;
@@ -154,14 +161,6 @@ void delete(NODE *root, long ID) {
 
 }
 
-void inorderTraversal(NODE *root) {
-    if (root != NULL) {
-        inorderTraversal(root->left);
-        printf("%ld %s %s %s\n", root->ID, root->fname, root->surname, root->dateOfBirth);
-        inorderTraversal(root->right);
-    }
-}
-
 int main() {
     char input;
     long ID;
@@ -189,9 +188,6 @@ int main() {
             case 'i':
                 scanf(" %ld %s %s %s", &ID, fname, surname, dateOfBirth);
                 create(&root, ID, fname, surname, dateOfBirth);
-                break;
-            case 'p':
-                inorderTraversal(root);
                 break;
             default:
                 break;
