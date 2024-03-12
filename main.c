@@ -128,9 +128,6 @@ void create(NODE **root, int ID, char *fname, char *surname, char *dateOfBirth) 
 
 void search(NODE *root, int ID, int ID2, int *was_printed) {
     if (ID2 != -1) {
-        if (root->ID > ID2){
-            return;
-        }
         if (root == NULL) {
             return;
         }
@@ -148,7 +145,9 @@ void search(NODE *root, int ID, int ID2, int *was_printed) {
         if (root->ID < ID2) {
             search(root->right, ID, ID2, was_printed);
         }
-
+        if (root->ID > ID2){
+            return;
+        }
     } else {
         if (root == NULL) {
             return;
