@@ -201,10 +201,16 @@ NODE *delete(NODE *root, int ID) {
         } else if (root->right == NULL) {
             node = root;
             root = root->left;
+            free(node->fname);
+            free(node->surname);
+            free(node->dateOfBirth);
             free(node);
         } else if (root->left == NULL) {
             node = root;
             root = root->right;
+            free(node->fname);
+            free(node->surname);
+            free(node->dateOfBirth);
             free(node);
         } else {
             //dolava doprava aj nezajdem na null
