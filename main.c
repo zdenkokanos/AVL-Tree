@@ -2,7 +2,7 @@
 #include <stdlib.h>
 
 typedef struct person {
-    long ID;
+    int ID;
     char fname[100];
     char surname[100];
     char dateOfBirth[12];
@@ -74,8 +74,8 @@ NODE *insert(NODE *root, NODE *new_node) {
     } else {
         return root; //there cannot be duplicit values
     }
-    int leftH = 0;
-    int rightH = 0;
+    int leftH;
+    int rightH;
     if (root->left != NULL) {
         leftH = root->left->height;
     } else {
@@ -109,7 +109,7 @@ NODE *insert(NODE *root, NODE *new_node) {
     return root;
 }
 
-void create(NODE **root, long ID, char *fname, char *surname, char *dateOfBirth) {
+void create(NODE **root, int ID, char *fname, char *surname, char *dateOfBirth) {
     NODE *new_node = (NODE *) malloc(sizeof(NODE));
     new_node->ID = ID;
     toString(new_node->fname, fname);           //implementation of own function to assign string
@@ -125,19 +125,19 @@ void create(NODE **root, long ID, char *fname, char *surname, char *dateOfBirth)
     }
 }
 
-void search(NODE *root, long ID, long ID2) {
+void search(NODE *root, int ID, int ID2) {
     if (ID2 != -1) {
         if (root == NULL) {
             return;
         }
-        if (ID <= root->ID && root->ID <= ID2) {
-            printf("%ld %s %s %s\n", root->ID, root->fname, root->surname, root->dateOfBirth);
-        }
-        if (root->ID <= ID2) {
-            search(root->right, ID, ID2);
-        }
-        if (root->ID >= ID) {
+        if (root->ID > ID) {
             search(root->left, ID, ID2);
+        }
+        if (ID <= root->ID && root->ID <= ID2) {
+            printf("%d %s %s %s\n", root->ID, root->fname, root->surname, root->dateOfBirth);
+        }
+        if (root->ID < ID2) {
+            search(root->right, ID, ID2);
         }
 
     } else {
@@ -145,26 +145,105 @@ void search(NODE *root, long ID, long ID2) {
             return;
         }
         if (ID == root->ID) {
-            printf("%ld %s %s %s\n", root->ID, root->fname, root->surname, root->dateOfBirth);
+            printf("%d %s %s %s\n", root->ID, root->fname, root->surname, root->dateOfBirth);
             return;
         }
-        if (root->ID < ID) {
+        if (root->ID > ID) {
             search(root->left, ID, ID2);
         } else {
             search(root->right, ID, ID2);
         }
-
     }
 }
 
-void delete(NODE *root, long ID) {
+NODE *rightMost(NODE *node) {
+    if (node == NULL)
+        return NULL;
+    else if (node->right == NULL)
+        return node;
+    else
+        return rightMost(node->right);
+}
 
+NODE *delete(NODE *root, int ID) {
+
+    if (root == NULL) {
+        return NULL;
+    } else if (ID < root->ID) {
+        root->left = delete(root->left, ID);  //searching for the value we want to delete
+    } else if (ID > root->ID) {
+        root->right = delete(root->right, ID);
+    } else {
+        NODE *node = NULL;
+        if (root->left == NULL && root->right == NULL) {
+            free(root);
+            return NULL;
+        } else if (root->right == NULL) {
+            node = root;
+            root = root->left;
+            free(node);
+            return root;
+        } else if (root->left == NULL) {
+            node = root;
+            root = root->right;
+            free(node);
+            return root;
+        } else {
+//            //dolava doprava aj nezajdem na null
+//            if(rightMost(root->left)==NULL){
+//                node = root;
+//                root = root->left;
+//                free(node);
+//                return root;
+//            }
+//            else{
+//                root = node;
+//                root = rightMost(root->left);
+//                free(node);
+//                return root;
+//            }
+        }
+    }
+    int leftH;
+    int rightH;
+    if (root->left != NULL) {
+        leftH = root->left->height;
+    } else {
+        leftH = 0;                 //if the parent does not have a child assign -1, because we add + 1
+        //                           // when assigning height to parent, so the final height is 0
+    }
+    if (root->right != NULL) {
+        rightH = root->right->height;
+    } else {
+        rightH = 0;
+    }
+
+    root->height = max(leftH, rightH) + 1;          //assigning height to parent
+
+    int balance = height(root->left) - height(root->right);
+    if (balance > 1) {
+        if (ID < root->left->ID) {  //the child is on the left ready to perform
+            return rightrotation(root);
+        } else {                                        //it means that the child is on the right
+            root->left = leftrotation(root->left);
+            return rightrotation(root);             //now it is in the right place to perform RR
+        }
+    } else if (balance < -1) {
+        if (ID > root->right->ID) { //the child is on the right ready to perform
+            return leftrotation(root);
+        } else {                        //it means the child is on the left
+            root->right = rightrotation(root->right);
+            return leftrotation(root);     //now it is in the right place to perform LR
+        }
+    }
+
+    return root;
 }
 
 int main() {
     char input;
-    long ID;
-    long ID2 = -1;
+    int ID;
+    int ID2 = -1;
     char fname[100];
     char surname[100];
     char dateOfBirth[12];
@@ -172,9 +251,9 @@ int main() {
     while (scanf(" %c", &input) == 1) {
         switch (input) {
             case 's':
-                scanf(" %ld", &ID);
+                scanf(" %d", &ID);
                 if (getchar() == ' ') {
-                    scanf(" %ld", &ID2);
+                    scanf("%d", &ID2); //pozriet ci ma byt medzera
                     search(root, ID, ID2);
                 } else {
                     ID2 = -1;
@@ -182,11 +261,11 @@ int main() {
                 }
                 break;
             case 'd':
-                scanf(" %ld", &ID);
-                delete(root, ID);
+                scanf(" %d", &ID);
+                root = delete(root, ID);
                 break;
             case 'i':
-                scanf(" %ld %s %s %s", &ID, fname, surname, dateOfBirth);
+                scanf(" %d %s %s %s", &ID, fname, surname, dateOfBirth);
                 create(&root, ID, fname, surname, dateOfBirth);
                 break;
             default:
