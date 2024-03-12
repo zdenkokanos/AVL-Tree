@@ -3,9 +3,9 @@
 
 typedef struct person {
     int ID;
-    char fname[100];
-    char surname[100];
-    char dateOfBirth[12];
+    char *fname;
+    char *surname;
+    char *dateOfBirth;
     int height;
     struct person *left;
     struct person *right;
@@ -32,6 +32,9 @@ void freeAll(NODE *root) {
     }
     freeAll(root->left);
     freeAll(root->right);
+    free(root->fname);
+    free(root->surname);
+    free(root->dateOfBirth);
     free(root);
 }
 
@@ -113,6 +116,9 @@ NODE *insert(NODE *root, NODE *new_node) {
 void create(NODE **root, int ID, char *fname, char *surname, char *dateOfBirth) {
     NODE *new_node = (NODE *) malloc(sizeof(NODE));
     new_node->ID = ID;
+    new_node->fname = malloc( 100*sizeof (char));
+    new_node->surname = malloc(100*sizeof (char));
+    new_node->dateOfBirth = malloc(12*sizeof (char));
     toString(new_node->fname, fname);           //implementation of own function to assign string
     toString(new_node->surname, surname);
     toString(new_node->dateOfBirth, dateOfBirth);
@@ -252,9 +258,9 @@ int main() {
     char input;
     int ID;
     int ID2 = -1;
-    char fname[100];
-    char surname[100];
-    char dateOfBirth[12];
+    char *fname = (char *) malloc(100*sizeof (char));
+    char *surname = (char *) malloc(100*sizeof (char));
+    char *dateOfBirth = (char *)malloc(12*sizeof (char));
     int was_printed = 1;
     NODE *root = NULL;
     while (scanf(" %c", &input) == 1) {
@@ -281,6 +287,9 @@ int main() {
                 break;
         }
     }
+    free(fname);
+    free(surname);
+    free(dateOfBirth);
     freeAll(root);
     return 0;
 }
