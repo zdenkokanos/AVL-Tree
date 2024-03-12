@@ -126,19 +126,27 @@ void create(NODE **root, int ID, char *fname, char *surname, char *dateOfBirth) 
     }
 }
 
-void search(NODE *root, int ID, int ID2) {
+void search(NODE *root, int ID, int ID2, int *was_printed) {
     if (ID2 != -1) {
+        if (root->ID > ID2){
+            return;
+        }
         if (root == NULL) {
             return;
         }
         if (root->ID > ID) {
-            search(root->left, ID, ID2);
+            search(root->left, ID, ID2, was_printed);
         }
         if (ID <= root->ID && root->ID <= ID2) {
-            printf("%d %s %s %s\n", root->ID, root->fname, root->surname, root->dateOfBirth);
+            if (*was_printed == 1) {
+                printf("%d %s %s %s", root->ID, root->fname, root->surname, root->dateOfBirth);
+                *was_printed = 0;
+            } else {
+                printf("\n%d %s %s %s", root->ID, root->fname, root->surname, root->dateOfBirth);
+            }
         }
         if (root->ID < ID2) {
-            search(root->right, ID, ID2);
+            search(root->right, ID, ID2, was_printed);
         }
 
     } else {
@@ -146,13 +154,18 @@ void search(NODE *root, int ID, int ID2) {
             return;
         }
         if (ID == root->ID) {
-            printf("%d %s %s %s\n", root->ID, root->fname, root->surname, root->dateOfBirth);
+            if (*was_printed == 1) {
+                printf("%d %s %s %s", root->ID, root->fname, root->surname, root->dateOfBirth);
+                *was_printed = 0;
+            } else {
+                printf("\n%d %s %s %s", root->ID, root->fname, root->surname, root->dateOfBirth);
+            }
             return;
         }
         if (root->ID > ID) {
-            search(root->left, ID, ID2);
+            search(root->left, ID, ID2, was_printed);
         } else {
-            search(root->right, ID, ID2);
+            search(root->right, ID, ID2, was_printed);
         }
     }
 }
@@ -189,15 +202,13 @@ NODE *delete(NODE *root, int ID) {
             free(node);
         } else {
             //dolava doprava aj nezajdem na null
-            if(rightMost(root->left)==NULL){
+            if (rightMost(root->left) == NULL) {
                 node = root;
                 root = root->left;
                 free(node);
-            }
-            else{
-                node = root;
-                root = rightMost(root->left);
-                free(node);
+            } else {
+                node = rightMost(root->left);
+                root->left = delete(root->left, node->ID);
             }
         }
     }
@@ -244,6 +255,7 @@ int main() {
     char fname[100];
     char surname[100];
     char dateOfBirth[12];
+    int was_printed = 1;
     NODE *root = NULL;
     while (scanf(" %c", &input) == 1) {
         switch (input) {
@@ -251,10 +263,10 @@ int main() {
                 scanf(" %d", &ID);
                 if (getchar() == ' ') {
                     scanf("%d", &ID2); //pozriet ci ma byt medzera
-                    search(root, ID, ID2);
+                    search(root, ID, ID2, &was_printed);
                 } else {
                     ID2 = -1;
-                    search(root, ID, ID2);
+                    search(root, ID, ID2, &was_printed);
                 }
                 break;
             case 'd':
