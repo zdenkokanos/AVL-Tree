@@ -72,7 +72,8 @@ NODE *insert(NODE *root, NODE *new_node) {
     } else if (root->ID < new_node->ID) {
         root->right = insert(root->right, new_node);
     } else {
-        return root; //there cannot be duplicit values
+        free(new_node); //there cannot be duplicit values
+        return root;
     }
     int leftH;
     int rightH;
@@ -182,26 +183,22 @@ NODE *delete(NODE *root, int ID) {
             node = root;
             root = root->left;
             free(node);
-            return root;
         } else if (root->left == NULL) {
             node = root;
             root = root->right;
             free(node);
-            return root;
         } else {
-//            //dolava doprava aj nezajdem na null
-//            if(rightMost(root->left)==NULL){
-//                node = root;
-//                root = root->left;
-//                free(node);
-//                return root;
-//            }
-//            else{
-//                root = node;
-//                root = rightMost(root->left);
-//                free(node);
-//                return root;
-//            }
+            //dolava doprava aj nezajdem na null
+            if(rightMost(root->left)==NULL){
+                node = root;
+                root = root->left;
+                free(node);
+            }
+            else{
+                node = root;
+                root = rightMost(root->left);
+                free(node);
+            }
         }
     }
     int leftH;
