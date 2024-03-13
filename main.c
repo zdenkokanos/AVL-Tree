@@ -269,6 +269,11 @@ int main() {
                 scanf(" %d", &ID);
                 if (getchar() == ' ') {
                     scanf("%d", &ID2); //pozriet ci ma byt medzera
+                    if(ID2 < ID){
+                        int temp = ID;
+                        ID = ID2;
+                        ID2 = temp;
+                    }
                     search(root, ID, ID2, &was_printed);
                 } else {
                     ID2 = -1;
