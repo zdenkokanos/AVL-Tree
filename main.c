@@ -3,9 +3,9 @@
 
 typedef struct person {
     int ID;
-    char *fname;
-    char *surname;
-    char *dateOfBirth;
+    char fname[10];
+    char surname[10];
+    char dateOfBirth[12];
     int height;
     struct person *left;
     struct person *right;
@@ -32,9 +32,6 @@ void freeAll(NODE *root) {
     }
     freeAll(root->left);
     freeAll(root->right);
-    free(root->fname);
-    free(root->surname);
-    free(root->dateOfBirth);
     free(root);
 }
 
@@ -116,9 +113,6 @@ NODE *insert(NODE *root, NODE *new_node) {
 void create(NODE **root, int ID, char *fname, char *surname, char *dateOfBirth) {
     NODE *new_node = (NODE *) malloc(sizeof(NODE));
     new_node->ID = ID;
-    new_node->fname = malloc( 100*sizeof (char));
-    new_node->surname = malloc(100*sizeof (char));
-    new_node->dateOfBirth = malloc(12*sizeof (char));
     toString(new_node->fname, fname);           //implementation of own function to assign string
     toString(new_node->surname, surname);
     toString(new_node->dateOfBirth, dateOfBirth);
@@ -134,9 +128,6 @@ void create(NODE **root, int ID, char *fname, char *surname, char *dateOfBirth) 
 
 void search(NODE *root, int ID, int ID2, int *was_printed) {
     if (ID2 != -1) {
-        if (root->ID > ID2){
-            return;
-        }
         if (root == NULL) {
             return;
         }
@@ -154,7 +145,9 @@ void search(NODE *root, int ID, int ID2, int *was_printed) {
         if (root->ID < ID2) {
             search(root->right, ID, ID2, was_printed);
         }
-
+        if (root->ID > ID2){
+            return;
+        }
     } else {
         if (root == NULL) {
             return;
@@ -201,16 +194,10 @@ NODE *delete(NODE *root, int ID) {
         } else if (root->right == NULL) {
             node = root;
             root = root->left;
-            free(node->fname);
-            free(node->surname);
-            free(node->dateOfBirth);
             free(node);
         } else if (root->left == NULL) {
             node = root;
             root = root->right;
-            free(node->fname);
-            free(node->surname);
-            free(node->dateOfBirth);
             free(node);
         } else {
             //dolava doprava aj nezajdem na null
@@ -264,9 +251,9 @@ int main() {
     char input;
     int ID;
     int ID2 = -1;
-    char *fname = (char *) malloc(100*sizeof (char));
-    char *surname = (char *) malloc(100*sizeof (char));
-    char *dateOfBirth = (char *)malloc(12*sizeof (char));
+    char *fname = (char *)malloc(10*sizeof(char));
+    char surname[10];
+    char dateOfBirth[12];
     int was_printed = 1;
     NODE *root = NULL;
     while (scanf(" %c", &input) == 1) {
@@ -294,8 +281,7 @@ int main() {
         }
     }
     free(fname);
-    free(surname);
-    free(dateOfBirth);
     freeAll(root);
     return 0;
+
 }
