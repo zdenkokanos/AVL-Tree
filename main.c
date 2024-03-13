@@ -3,8 +3,8 @@
 
 typedef struct person {
     int ID;
-    char fname[100];
-    char surname[100];
+    char fname[26];
+    char surname[26];
     char dateOfBirth[12];
     int height;
     struct person *left;
@@ -145,7 +145,7 @@ void search(NODE *root, int ID, int ID2, int *was_printed) {
         if (root->ID < ID2) {
             search(root->right, ID, ID2, was_printed);
         }
-        if (root->ID > ID2){
+        if (root->ID > ID2) {
             return;
         }
     } else {
@@ -207,9 +207,16 @@ NODE *delete(NODE *root, int ID) {
                 free(node);
             } else {
                 node = rightMost(root->left);
+                root->ID = node->ID;
+                toString(root->fname, node->fname);
+                toString(root->surname, node->surname);
+                toString(root->dateOfBirth, node->dateOfBirth);
                 root->left = delete(root->left, node->ID);
             }
         }
+    }
+    if (root == NULL) {
+        return root;
     }
     int leftH;
     int rightH;
@@ -228,20 +235,20 @@ NODE *delete(NODE *root, int ID) {
     root->height = max(leftH, rightH) + 1;          //assigning height to parent
 
     int balance = height(root->left) - height(root->right);
-    if (balance > 1) {
-        if (ID < root->left->ID) {  //the child is on the left ready to perform
-            return rightrotation(root);
-        } else {                                        //it means that the child is on the right
-            root->left = leftrotation(root->left);
-            return rightrotation(root);             //now it is in the right place to perform RR
-        }
-    } else if (balance < -1) {
-        if (ID > root->right->ID) { //the child is on the right ready to perform
-            return leftrotation(root);
-        } else {                        //it means the child is on the left
-            root->right = rightrotation(root->right);
-            return leftrotation(root);     //now it is in the right place to perform LR
-        }
+    if (balance > 1 && height(root->left->left) >= height(root->left->right))
+        return rightrotation(root);
+
+    if (balance > 1 && height(root->left->left) < height(root->left->right)) {
+        root->left = leftrotation(root->left);
+        return rightrotation(root);
+    }
+
+    if (balance < -1 && height(root->right->left) <= height(root->right->right))
+        return leftrotation(root);
+
+    if (balance < -1 && height(root->right->left) > height(root->right->right)) {
+        root->right = rightrotation(root->right);
+        return leftrotation(root);
     }
 
     return root;
@@ -251,8 +258,8 @@ int main() {
     char input;
     int ID;
     int ID2 = -1;
-    char fname[100];
-    char surname[100];
+    char fname[26];
+    char surname[26];
     char dateOfBirth[12];
     int was_printed = 1;
     NODE *root = NULL;
@@ -270,7 +277,8 @@ int main() {
                 break;
             case 'd':
                 scanf(" %d", &ID);
-                root = delete(root, ID);
+                if (root != NULL)
+                    root = delete(root, ID);
                 break;
             case 'i':
                 scanf(" %d %s %s %s", &ID, fname, surname, dateOfBirth);
